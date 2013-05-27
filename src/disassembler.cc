@@ -12,7 +12,7 @@
 typedef unsigned short uint16;
 typedef unsigned char uint8;
 
-enum Type
+enum class Type
 {
     SUB,
     ADR
@@ -49,10 +49,10 @@ void parse(std::ifstream& rom)
         switch ((op & 0xF000) >> 12)
         {
             case 1:
-                functions[op & 0x0FFF] = ADR;
+                functions[op & 0x0FFF] = Type::ADR;
                 break;
             case 2:
-                functions[op & 0x0FFF] = SUB;
+                functions[op & 0x0FFF] = Type::SUB;
                 break;
         }
     }
@@ -70,7 +70,7 @@ void pretty_print()
                 std::cout << "start";
             else
             {
-                if (it->second == SUB)
+                if (it->second == Type::SUB)
                     std::cout << "sub_";
                 else
                     std::cout << "adr_";
@@ -87,86 +87,86 @@ void pretty_print()
                     if ((op & 0x0FFF) == 0xE0)
                         std::cout << "CLS";
                     else if ((op & 0x0FFF) == 0xEE)
-                        std::cout << "ret";
+                        std::cout << "RET";
                     else
-                        std::cout << "goto adr:" << (op & 0x0FFF);
+                        std::cout << "GOTO adr:" << (op & 0x0FFF);
                     break;
                 case 1:
-                    std::cout << "jmp " << (op & 0x0FFF);
+                    std::cout << "JP " << (op & 0x0FFF);
                     break;
                 case 2:
-                    std::cout << "call sub_" << (op & 0x0FFF);
+                    std::cout << "CALL sub_" << (op & 0x0FFF);
                     break;
                 case 3:
-                    std::cout << "seq v" << ((op & 0x0F00) >> 8) << ", " << (op & 0x00FF);
+                    std::cout << "SE V" << ((op & 0x0F00) >> 8) << ", " << (op & 0x00FF);
                     break;
                 case 4:
-                    std::cout << "snq v" << ((op & 0x0F00) >> 8) << ", " << (op & 0x00FF);
+                    std::cout << "SNE V" << ((op & 0x0F00) >> 8) << ", " << (op & 0x00FF);
                     break;
                 case 5:
-                    std::cout << "seq v" << ((op & 0x0F00) >> 8) << ", v" << ((op & 0x00F0) >> 4);
+                    std::cout << "SE V" << ((op & 0x0F00) >> 8) << ", V" << ((op & 0x00F0) >> 4);
                     break;
                 case 6:
-                    std::cout << "mov " << (op & 0x00FF) << ", v" << ((op & 0x0F00) >> 8);
+                    std::cout << "LD V" << ((op & 0x0F00) >> 8) << ", " << (op & 0x00FF);
                     break;
                 case 7:
-                    std::cout << "add " << (op & 0x00FF) << ", v" << ((op & 0x0F00) >> 8);
+                    std::cout << "ADD V" << ((op & 0x0F00) >> 8) << ", " << (op & 0x00FF);
                     break;
                 case 8:
                     switch (op & 0x000F)
                     {
                         case 0:
-                            std::cout << "mov v" << ((op & 0x00F0) >> 4) << ", v" << ((op & 0x0F00) >> 8);
+                            std::cout << "LD V" << ((op & 0x00F0) >> 4) << ", V" << ((op & 0x0F00) >> 8);
                             break;
                         case 1:
-                            std::cout << "qor v" << ((op & 0x00F0) >> 4) << ", v" << ((op & 0x0F00) >> 8);
+                            std::cout << "OR V" << ((op & 0x0F00) >> 8) << ", V" << ((op & 0x00F0) >> 4);
                             break;
                         case 2:
-                            std::cout << "qand v" << ((op & 0x00F0) >> 4) << ", v" << ((op & 0x0F00) >> 8);
+                            std::cout << "AND V" << ((op & 0x0F00) >> 8) << ", V" << ((op & 0x00F0) >> 4);
                             break;
                         case 3:
-                            std::cout << "qxor v" << ((op & 0x00F0) >> 4) << ", v" << ((op & 0x0F00) >> 8);
+                            std::cout << "XOR V" << ((op & 0x0F00) >> 8) << ", V" << ((op & 0x00F0) >> 4);
                             break;
                         case 4:
-                            std::cout << "add v" << ((op & 0x00F0) >> 4) << ", v" << ((op & 0x0F00) >> 8);
+                            std::cout << "ADD V" << ((op & 0x0F00) >> 8) << ", V" << ((op & 0x00F0) >> 4);
                             break;
                         case 5:
-                            std::cout << "sub v" << ((op & 0x00F0) >> 4) << ", v" << ((op & 0x0F00) >> 8);
+                            std::cout << "SUB V" << ((op & 0x0F00) >> 8) << ", V" << ((op & 0x00F0) >> 4);
                             break;
                         case 6:
-                            std::cout << "rsh v" << ((op & 0x0F00) >> 8);
+                            std::cout << "SHR V" << ((op & 0x0F00) >> 8);
                             break;
                         case 7:
-                            std::cout << "qsub v" << ((op & 0x00F0) >> 4) << ", v" << ((op & 0x0F00) >> 8);
+                            std::cout << "SUBN V" << ((op & 0x0F00) >> 8) << ", V" << ((op & 0x00F0) >> 4);
                             break;
                         case 0xE:
-                            std::cout << "lsh v" << ((op & 0x0F00) >> 8);
+                            std::cout << "SHL V" << ((op & 0x0F00) >> 8);
                             break;
                     }
                     break;
                 case 9:
-                    std::cout << "snq v" << ((op & 0x0F00) >> 8) << ", v" << ((op & 0x00F0) >> 4);
+                    std::cout << "SNE V" << ((op & 0x0F00) >> 8) << ", V" << ((op & 0x00F0) >> 4);
                     break;
                 case 0xA:
-                    std::cout << "mov " << (op & 0x0FFF) << ", I";
+                    std::cout << "LD I, " << (op & 0x0FFF);
                     break;
                 case 0xB:
-                    std::cout << "vjmp " << (op & 0x0FFF) << ", I";
+                    std::cout << "JP V0, " << (op & 0x0FFF);
                     break;
                 case 0xC:
-                    std::cout << "rnd " << (op & 0x00FF) << ", v" << ((op & 0x0F00) >> 8);
+                    std::cout << "RND V" << ((op & 0x0F00) >> 8) << ", " << (op & 0x00FF);
                     break;
                 case 0xD:
-                    std::cout << "drw v" << ((op & 0x0F00) >> 8) << ", v" << ((op & 0x00F0) >> 4) << ", " << (op & 0x00FF);
+                    std::cout << "DRW V" << ((op & 0x0F00) >> 8) << ", V" << ((op & 0x00F0) >> 4) << ", " << (op & 0x00FF);
                     break;
                 case 0xE:
                     switch (op & 0x00FF)
                     {
                         case 0x9E:
-                            std::cout << "sep v" << ((op & 0x0F00) >> 8);
+                            std::cout << "SKP V" << ((op & 0x0F00) >> 8);
                             break;
                         case 0xA1:
-                            std::cout << "snp v" << ((op & 0x0F00) >> 8);
+                            std::cout << "SKNP V" << ((op & 0x0F00) >> 8);
                             break;
                     }
                     break;
@@ -174,31 +174,31 @@ void pretty_print()
                     switch (op & 0x00FF)
                     {
                         case 0x07:
-                            std::cout << "mov DT, v" << ((op & 0x0F00) >> 8);
+                            std::cout << "LD V" << ((op & 0x0F00) >> 8) << ", DT";
                             break;
                         case 0x0A:
-                            std::cout << "wat v" << ((op & 0x0F00) >> 8);
+                            std::cout << "LD V" << ((op & 0x0F00) >> 8) << ", K";
                             break;
                         case 0x15:
-                            std::cout << "mov v" << ((op & 0x0F00) >> 8) << ", DT";
+                            std::cout << "LD DT, V" << ((op & 0x0F00) >> 8);
                             break;
                         case 0x18:
-                            std::cout << "mov " << (op & 0x0FFF) << ", ST";
+                            std::cout << "LD ST, V" << ((op & 0x0F00) >> 8);
                             break;
                         case 0x1E:
-                            std::cout << "add v" << ((op & 0x0F00) >> 8) << ", I";
+                            std::cout << "ADD I, V" << ((op & 0x0F00) >> 8);
                             break;
                         case 0x29:
-                            std::cout << "set v" << ((op & 0x0F00) >> 8) << ", I";
+                            std::cout << "LD F, V" << ((op & 0x0F00) >> 8);
                             break;
                         case 0x33:
-                            std::cout << "strb v" << ((op & 0x0F00) >> 8);
+                            std::cout << "LD B, V" << ((op & 0x0F00) >> 8);
                             break;
                         case 0x55:
-                            std::cout << "str " << ((op & 0x0F00) >> 8);
+                            std::cout << "LD [I], V" << ((op & 0x0F00) >> 8);
                             break;
                         case 0x65:
-                            std::cout << "ld " << ((op & 0x0F00) >> 8);
+                            std::cout << "LD V" << ((op & 0x0F00) >> 8) << ", [i]";
                             break;
                     }
                     break;
@@ -220,7 +220,7 @@ int main(int argc, char** argv)
     }
     std::string file(argv[1]);
 
-    functions[0x200] = SUB;
+    functions[0x200] = Type::SUB;
     std::ifstream rom(file, std::ios::ate);
     if (!rom.is_open())
     {
